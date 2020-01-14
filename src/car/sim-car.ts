@@ -19,6 +19,8 @@ export class SimCar {
             port: 1883,
             clientId: `car:${this.uuid}`
         }
+
+        // TODO: 這個 client 應該分出去 全部車子共用？ 不用？
         const client = mqtt.connect('mqtt://127.0.0.1', opt)
 
         client.on('connect', (packet) => {
@@ -31,6 +33,9 @@ export class SimCar {
                 // else {
                 //     client.publish(NewOrderChannel, 'Hello mqtt')
                 // }
+
+                // 開機先問
+                this.askNewTask()
             })
         })
 
@@ -52,8 +57,10 @@ export class SimCar {
             this.debug('busy in work')
         }
         else {
+            this.debug(`ask new task`)
             let res = await GlobalUse.api.askNewTask(this.uuid)
             if (res.success) {
+                this.debug(`get task:${res.taskID}`)
                 this.work(res.taskID)
             }
         }
@@ -67,16 +74,20 @@ export class SimCar {
             return
         }
 
-        this.isWorking = true
         this.taskID = taskID
+        this.isWorking = true
 
-        let time = random(9000, 5000)
-        this.debug(`work for task:${taskID} use time:${time} ms`)
-        await delay(time)
+        {
+            // 車子工作
+            let time = random(9000, 5000)
+            this.debug(`work for task:${taskID} use time:${time} ms`)
+            await delay(time)
+            this.debug(`finish task:${taskID} use time:${time} ms`)
 
-        this.debug(`finish task:${taskID} use time:${time} ms`)
+            // 車子休息
+            await delay(1000)
+        }
 
-        await delay(1000) // 車子休息
         this.isWorking = false
 
         this.askNewTask()
