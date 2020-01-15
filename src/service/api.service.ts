@@ -18,7 +18,7 @@ export class ApiService {
 
     async finishOrder(carName: string, OrderId: number) {
 
-        return this.convenientReq('test/FinishOrder',
+        return this.convenientReq(`test/FinishOrder/${OrderId}`,
             {
                 carName,
                 OrderId,

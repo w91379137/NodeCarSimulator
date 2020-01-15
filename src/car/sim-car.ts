@@ -57,6 +57,7 @@ export class SimCar {
             this.debug('busy in work')
         }
         else {
+            // this.work(1000) // 測試用
             this.debug(`ask new task`)
             let res = await GlobalUse.api.askNewOrder(this.uuid)
             if (res.OrderId) {
@@ -85,7 +86,7 @@ export class SimCar {
             let time = random(9000, 5000)
             this.debug(`work for task:${orderId} use time:${time} ms`)
             await delay(time)
-            await GlobalUse.api.finishOrder(this.uuid, this.uuid)
+            await GlobalUse.api.finishOrder(this.uuid, this.orderId)
 
             this.debug(`finish task:${orderId} use time:${time} ms`)
 
