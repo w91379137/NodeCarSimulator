@@ -4,23 +4,24 @@ const debug = require('debug')('app:api.service');
 
 export class ApiService {
 
-    private serverUrl = 'http://127.0.0.1:5000/';  // URL to web api
+    private serverUrl = 'http://localhost:3000/';  // URL to web api
 
     // ====.====.====.====.====.====.====.====.====.====.====.====.====.====.====.====.====.====.====
 
-    async askNewTask(carName: string) {
-        return this.convenientReq('askNewTask',
+    async askNewOrder(carName: string) {
+
+        return this.convenientReq('test/Order',
             {
                 carName,
             })
     }
 
-    async finishTask(carName: string, taskID: number) {
+    async finishOrder(carName: string, OrderId: number) {
 
-        return this.convenientReq('finishTask',
+        return this.convenientReq('test/FinishOrder',
             {
                 carName,
-                taskID,
+                OrderId,
             })
     }
 

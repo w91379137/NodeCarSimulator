@@ -4,7 +4,7 @@ import * as mqtt from 'mqtt';
 import { GlobalUse } from '../global-use';
 let debugLib = require('debug')
 
-const NewOrderChannel = '監聽主機 有新的 訂單頻道'
+const NewOrderChannel = 'home'
 
 export class SimCar {
 
@@ -21,7 +21,7 @@ export class SimCar {
         }
 
         // TODO: 這個 client 應該分出去 全部車子共用？ 不用？
-        const client = mqtt.connect('mqtt://127.0.0.1', opt)
+        const client = mqtt.connect('mqtt://localhost', opt)
 
         client.on('connect', (packet) => {
             this.debug('mqtt connect')
@@ -35,7 +35,7 @@ export class SimCar {
                 // }
 
                 // 開機先問
-                this.askNewTask()
+                this.askNewOrder()
             })
         })
 
@@ -43,7 +43,7 @@ export class SimCar {
             this.debug(topic, message.toString())
 
             if (topic === NewOrderChannel) {
-                this.askNewTask()
+                this.askNewOrder()
             }
         })
     }
@@ -51,38 +51,43 @@ export class SimCar {
     // ====.====.====.====.====.====.====.====.====.====.====.====.====.====.====.====.====.====.====
 
     isWorking = false;
-    async askNewTask() {
+    async askNewOrder() {
 
         if (this.isWorking) {
             this.debug('busy in work')
         }
         else {
             this.debug(`ask new task`)
-            let res = await GlobalUse.api.askNewTask(this.uuid)
-            if (res.success) {
-                this.debug(`get task:${res.taskID}`)
-                this.work(res.taskID)
+            let res = await GlobalUse.api.askNewOrder(this.uuid)
+            if (res.OrderId) {
+                this.debug(`get task:${res.OrderId}`)
+                this.work(res.OrderId)
+            }
+            else {
+                this.debug(`get task fail`)
             }
         }
     }
 
-    taskID = -1
-    async work(taskID: number) {
+    orderId = -1
+    async work(orderId: number) {
 
         if (this.isWorking) {
-            this.debug(`busy in work task:${taskID} fail`)
+            this.debug(`busy in work task:${orderId} fail`)
             return
         }
 
-        this.taskID = taskID
+        this.orderId = orderId
         this.isWorking = true
 
         {
             // 車子工作
             let time = random(9000, 5000)
-            this.debug(`work for task:${taskID} use time:${time} ms`)
+            this.debug(`work for task:${orderId} use time:${time} ms`)
             await delay(time)
-            this.debug(`finish task:${taskID} use time:${time} ms`)
+            await GlobalUse.api.finishOrder(this.uuid, this.uuid)
+
+            this.debug(`finish task:${orderId} use time:${time} ms`)
 
             // 車子休息
             await delay(1000)
@@ -90,7 +95,7 @@ export class SimCar {
 
         this.isWorking = false
 
-        this.askNewTask()
+        this.askNewOrder()
     }
 
     // ====.====.====.====.====.====.====.====.====.====.====.====.====.====.====.====.====.====.====
