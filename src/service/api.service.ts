@@ -29,7 +29,7 @@ export class ApiService {
     // 共用
     private async convenientReq(path: string, body: any): Promise<any> {
         debug(`api path: %o body: %o`, path, body);
-        console.log(`api path: %o body: %o`, path, body);
+        // console.log(`api path: %o body: %o`, path, body);
 
         const res = await post(this.serverUrl + path, body)
             .catch(this.handleError);
